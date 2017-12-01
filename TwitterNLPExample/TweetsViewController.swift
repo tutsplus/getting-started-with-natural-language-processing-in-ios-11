@@ -10,6 +10,7 @@ import UIKit
 import TwitterKit
 import SafariServices
 import Highlighter
+import Foundation
 
 class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
     
@@ -65,7 +66,7 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         self.isLoadingTweets = true
         
         // set tweetIds to find
-        let tweetIDs = ["936415556197945344", "936248803182514176", "936093689612505088", "935187735844917255", "935094631787843584"];
+        let tweetIDs = ["936248803182514176", "936093689612505088", "930594260352561152", "935094631787843584", "932338973724348417"];
         
         
         // Find the tweets with the tweetIDs
@@ -126,18 +127,79 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         let tweet = tweets[indexPath.row]
         
         cell.textLabel?.text = tweet.text
-        cell.detailTextLabel?.text = "By \(tweet.author.screenName)"
-        cell.textLabel?.highlight(text: "Drag", normal: nil, highlight: [NSAttributedStringKey.backgroundColor: UIColor.yellow])
-        
-        // Configure the cell with the Tweet.
-        //cell.configure(with: tweet)
-        
+        cell.detailTextLabel?.text = "By \(tweet.author.screenName). Language: \(self.detectLanguage(for: tweet.text))"
+        //getTokenization(from: cell.textLabel!)
+        getNamedEntityRecognition(from: cell.textLabel!)
         // Return the Tweet cell.
         return cell
     }
-    
-    
+
 }
 
+extension TweetsViewController{
+    
+    //(1) First method detects the language using .language property of NSLinguisticTagger
+    func detectLanguage(for text: String) -> String {
+        // initialize linguistic tagger with the language scheme
+        let tagger = NSLinguisticTagger(tagSchemes: [.language], options: 0)
+        
+        // set tagger's string property to text being passed in
+        tagger.string = text
+        
+        return (tagger.dominantLanguage)!
+    }
+    //(2) Tokenization - Segmenting into words, sentences, paragraphs etc
+    func getTokenization(from textLabel: UILabel){
+        let tagger = NSLinguisticTagger(tagSchemes: [.tokenType], options: 0)
+        tagger.string = textLabel.text
+        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
+        
+        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
+        
+        tagger.enumerateTags(in: range, unit: .word, scheme: .tokenType, options: options) {
+            tag, tokenRange, stop in
+            let token = (textLabel.text! as NSString).substring(with: tokenRange)
+            print("token: \(token)")
+            textLabel.highlight(text: token, normal: nil, highlight: [NSAttributedStringKey.backgroundColor: UIColor.red])
+        }
+    }
+    
+    //(3) Named Entity Recognition
+    func getNamedEntityRecognition(from textLabel: UILabel) {
+        let tagger = NSLinguisticTagger(tagSchemes: [.nameType], options: 0)
+        tagger.string = textLabel.text
+        let keywordAttrString = NSMutableAttributedString(string: textLabel.text!, attributes: nil)
+        
+        var keywords = [String]()
+        
+        
+        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
+        
+        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
+        
+        let tags: [NSLinguisticTag] = [.personalName, .placeName, .organizationName]
+ 
+        tagger.enumerateTags(in: range, unit: .word, scheme: .nameType, options: options) {
+            tag, tokenRange, stop in
 
+
+            if let tag = tag, tags.contains(tag) {
+                let name = (textLabel.text! as NSString).substring(with: tokenRange)
+                print("entity: \(name)")
+                keywords.append(name)
+            }
+        }
+        for name in keywords{
+            if let indices = textLabel.text?.indicesOf(string: name){
+                for i in indices{
+                    let range = NSRange(i..<name.count+i)
+                    keywordAttrString.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: range)
+                }
+                textLabel.attributedText = keywordAttrString
+            }
+        }
+        
+        
+    }
+}
 

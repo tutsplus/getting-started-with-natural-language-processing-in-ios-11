@@ -11,6 +11,7 @@
 		C40BA0E11FD0F6BB00EBF8E0 /* TweetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40BA0E01FD0F6BB00EBF8E0 /* TweetsViewController.swift */; };
 		C40BA0E61FD10B6000EBF8E0 /* Twitter.plist in Resources */ = {isa = PBXBuildFile; fileRef = C40BA0E51FD10B6000EBF8E0 /* Twitter.plist */; };
 		C40BA0E81FD10C5600EBF8E0 /* TweetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40BA0E71FD10C5600EBF8E0 /* TweetCell.swift */; };
+		C40BA0EA1FD1DE7000EBF8E0 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40BA0E91FD1DE7000EBF8E0 /* String+Extensions.swift */; };
 		C4FF12DB1FCFCCF7006558BF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FF12DA1FCFCCF7006558BF /* AppDelegate.swift */; };
 		C4FF12E21FCFCCF7006558BF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4FF12E01FCFCCF7006558BF /* Main.storyboard */; };
 		C4FF12E41FCFCCF7006558BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4FF12E31FCFCCF7006558BF /* Assets.xcassets */; };
@@ -25,6 +26,7 @@
 		C40BA0E41FD1008000EBF8E0 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		C40BA0E51FD10B6000EBF8E0 /* Twitter.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Twitter.plist; sourceTree = "<group>"; };
 		C40BA0E71FD10C5600EBF8E0 /* TweetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetCell.swift; sourceTree = "<group>"; };
+		C40BA0E91FD1DE7000EBF8E0 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		C4FF12D71FCFCCF7006558BF /* TwitterNLPExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TwitterNLPExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4FF12DA1FCFCCF7006558BF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C4FF12E11FCFCCF7006558BF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 			children = (
 				C4FF12DA1FCFCCF7006558BF /* AppDelegate.swift */,
 				C40BA0E01FD0F6BB00EBF8E0 /* TweetsViewController.swift */,
+				C40BA0E91FD1DE7000EBF8E0 /* String+Extensions.swift */,
 				C40BA0E71FD10C5600EBF8E0 /* TweetCell.swift */,
 				C4FF12E01FCFCCF7006558BF /* Main.storyboard */,
 				C4FF12E31FCFCCF7006558BF /* Assets.xcassets */,
@@ -222,6 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C40BA0EA1FD1DE7000EBF8E0 /* String+Extensions.swift in Sources */,
 				C4FF12DB1FCFCCF7006558BF /* AppDelegate.swift in Sources */,
 				C40BA0E11FD0F6BB00EBF8E0 /* TweetsViewController.swift in Sources */,
 				C40BA0E81FD10C5600EBF8E0 /* TweetCell.swift in Sources */,
