@@ -128,8 +128,9 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         
         cell.textLabel?.text = tweet.text
         cell.detailTextLabel?.text = "By \(tweet.author.screenName). Language: \(self.detectLanguage(for: tweet.text))"
-        //getTokenization(from: cell.textLabel!)
+        getTokenization(from: cell.textLabel!)
         getNamedEntityRecognition(from: cell.textLabel!)
+        getLemmatization(from: cell.textLabel!)
         // Return the Tweet cell.
         return cell
     }
@@ -151,6 +152,8 @@ extension TweetsViewController{
     //(2) Tokenization - Segmenting into words, sentences, paragraphs etc
     func getTokenization(from textLabel: UILabel){
         let tagger = NSLinguisticTagger(tagSchemes: [.tokenType], options: 0)
+        var tokens = [String]()
+        
         tagger.string = textLabel.text
         let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
         
@@ -159,9 +162,9 @@ extension TweetsViewController{
         tagger.enumerateTags(in: range, unit: .word, scheme: .tokenType, options: options) {
             tag, tokenRange, stop in
             let token = (textLabel.text! as NSString).substring(with: tokenRange)
-            print("token: \(token)")
-            textLabel.highlight(text: token, normal: nil, highlight: [NSAttributedStringKey.backgroundColor: UIColor.red])
+            tokens.append(token)
         }
+        print("tokens \(tokens)")
     }
     
     //(3) Named Entity Recognition
@@ -198,8 +201,24 @@ extension TweetsViewController{
                 textLabel.attributedText = keywordAttrString
             }
         }
+    }
+    //(4) Lemmatization - Finding the root of words
+    func getLemmatization(from textLabel: UILabel){
+        let tagger = NSLinguisticTagger(tagSchemes: [.lemma], options: 0)
+        var lemmas = [String]()
         
+        tagger.string = textLabel.text
+        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
         
+        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
+        
+        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) {
+            tag, tokenRange, stop in
+            if let lemma = tag?.rawValue {
+                lemmas.append(lemma)
+            }
+        }
+        print("lemmas \(lemmas)")
     }
 }
 
