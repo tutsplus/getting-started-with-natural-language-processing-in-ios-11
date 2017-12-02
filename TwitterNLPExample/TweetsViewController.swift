@@ -22,6 +22,10 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
     }
     
     let reuseIdentifier: String = "reuseIdentifier"
+    var range: NSRange? = nil
+    let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
+    
+    var tokens = [String]()
     
     var isLoadingTweets = false
     
@@ -52,9 +56,7 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        // Make sure the navigation bar is not translucent when scrolling the table view.
-        self.navigationController?.navigationBar.isTranslucent = false
+
     }
     
     
@@ -94,16 +96,6 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         loadTweets()
     }
     
-    // MARK: TWTRTweetViewDelegate
-    func tweetView(_ tweetView: TWTRTweetView!, didSelect tweet: TWTRTweet!) {
-        // Display a Web View when selecting the Tweet.
-        let webViewController = UIViewController()
-        let webView = UIWebView(frame: webViewController.view.bounds)
-        webView.loadRequest(URLRequest(url: tweet.permalink))
-        webViewController.view = webView
-        self.navigationController?.pushViewController(webViewController, animated: true)
-    }
-    
     // MARK: UITableViewDataSource
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return the number of Tweets.
@@ -127,98 +119,107 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         let tweet = tweets[indexPath.row]
         
         cell.textLabel?.text = tweet.text
-        cell.detailTextLabel?.text = "By \(tweet.author.screenName). Language: \(self.detectLanguage(for: tweet.text))"
-        getTokenization(from: cell.textLabel!)
-        getNamedEntityRecognition(from: cell.textLabel!)
-        getLemmatization(from: cell.textLabel!)
+        cell.detailTextLabel?.text = "By \(tweet.author.screenName)."
+        self.range = NSRange(location:0, length: (tweet.text.utf16.count))
+        self.detectLanguage(with: cell.textLabel!)
+        self.getTokenization(with: cell.textLabel!)
+        self.getNamedEntityRecognition(with: cell.textLabel!)
+        self.getLemmatization(with: cell.textLabel!)
         // Return the Tweet cell.
         return cell
     }
 
 }
 
+//NLP Implementation methods
 extension TweetsViewController{
     
-    //(1) First method detects the language using .language property of NSLinguisticTagger
-    func detectLanguage(for text: String) -> String {
-        // initialize linguistic tagger with the language scheme
-        let tagger = NSLinguisticTagger(tagSchemes: [.language], options: 0)
-        
-        // set tagger's string property to text being passed in
-        tagger.string = text
-        
-        return (tagger.dominantLanguage)!
+//    (1) First method detects the language using .language property of NSLinguisticTagger
+    func detectLanguage(with textLabel:UILabel) {
+        let _ = enumerate(scheme: .language, label: textLabel)
     }
+    
     //(2) Tokenization - Segmenting into words, sentences, paragraphs etc
-    func getTokenization(from textLabel: UILabel){
-        let tagger = NSLinguisticTagger(tagSchemes: [.tokenType], options: 0)
-        var tokens = [String]()
-        
-        tagger.string = textLabel.text
-        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
-        
-        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
-        
-        tagger.enumerateTags(in: range, unit: .word, scheme: .tokenType, options: options) {
-            tag, tokenRange, stop in
-            let token = (textLabel.text! as NSString).substring(with: tokenRange)
-            tokens.append(token)
-        }
-        print("tokens \(tokens)")
+    func getTokenization(with textLabel:UILabel){
+        let _ = enumerate(scheme: .tokenType, label: textLabel)
+
     }
     
     //(3) Named Entity Recognition
-    func getNamedEntityRecognition(from textLabel: UILabel) {
-        let tagger = NSLinguisticTagger(tagSchemes: [.nameType], options: 0)
-        tagger.string = textLabel.text
-        let keywordAttrString = NSMutableAttributedString(string: textLabel.text!, attributes: nil)
+    func getNamedEntityRecognition(with textLabel: UILabel) {
         
-        var keywords = [String]()
+        let _ = enumerate(scheme: .nameType, label: textLabel)
         
-        
-        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
-        
-        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
-        
-        let tags: [NSLinguisticTag] = [.personalName, .placeName, .organizationName]
- 
-        tagger.enumerateTags(in: range, unit: .word, scheme: .nameType, options: options) {
-            tag, tokenRange, stop in
-
-
-            if let tag = tag, tags.contains(tag) {
-                let name = (textLabel.text! as NSString).substring(with: tokenRange)
-                print("entity: \(name)")
-                keywords.append(name)
-            }
-        }
-        for name in keywords{
-            if let indices = textLabel.text?.indicesOf(string: name){
-                for i in indices{
-                    let range = NSRange(i..<name.count+i)
-                    keywordAttrString.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: range)
-                }
-                textLabel.attributedText = keywordAttrString
-            }
-        }
     }
     //(4) Lemmatization - Finding the root of words
-    func getLemmatization(from textLabel: UILabel){
-        let tagger = NSLinguisticTagger(tagSchemes: [.lemma], options: 0)
+    func getLemmatization(with textLabel: UILabel){
+        let _ = enumerate(scheme: .lemma, label: textLabel)
+    }
+}
+
+extension TweetsViewController{
+    func enumerate(scheme:NSLinguisticTagScheme, label: UILabel) -> [String]?{
+        var keywords = [String]()
         var lemmas = [String]()
         
-        tagger.string = textLabel.text
-        let range = NSRange(location:0, length: (textLabel.text?.utf16.count)!)
+        let tags: [NSLinguisticTag] = [.personalName, .placeName, .organizationName]
         
-        let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
-        
-        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) {
-            tag, tokenRange, stop in
-            if let lemma = tag?.rawValue {
-                lemmas.append(lemma)
+        let tagger = NSLinguisticTagger(tagSchemes: [scheme], options: 0)
+        tagger.string = label.text
+        tagger.enumerateTags(in: range!, unit: .word, scheme: scheme, options: options) {
+            tag, tokenRange, _ in
+            //let token = (self.tagger.string! as NSString).substring(with: tokenRange)
+
+            switch(scheme){
+            case NSLinguisticTagScheme.lemma:
+                if let lemma = tag?.rawValue {
+                    lemmas.append(lemma)
+                }
+                break
+            case NSLinguisticTagScheme.language:
+                print("Dominant language: \(tagger.dominantLanguage ?? "Undetermined ")")
+                break
+            case NSLinguisticTagScheme.nameType:
+                if let tag = tag, tags.contains(tag) {
+                    let name = (label.text! as NSString).substring(with: tokenRange)
+                    print("entity: \(name)")
+                    keywords.append(name)
+                }
+                break
+            case NSLinguisticTagScheme.lexicalClass:
+                break
+            case NSLinguisticTagScheme.tokenType:
+                if let tagVal = tag?.rawValue {
+                    self.tokens.append(tagVal.lowercased())
+                }
+                break
+            default:
+                break
             }
+
         }
-        print("lemmas \(lemmas)")
+        //print("tokens: \(tokens)")
+        
+        if (scheme == .nameType){
+            let keywordAttrString = NSMutableAttributedString(string: tagger.string!, attributes: nil)
+            
+            for name in keywords{
+                
+                if let indices = label.text?.indicesOf(string: name){
+                    for i in indices{
+                        let range = NSRange(i..<name.count+i)
+                        keywordAttrString.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: range)
+                    }
+                    label.attributedText = keywordAttrString
+                }
+            }
+            return keywords
+        }else if (scheme == .lemma){
+            print("lemmas \(lemmas)")
+            return lemmas
+        }
+        return nil
     }
+
 }
 
