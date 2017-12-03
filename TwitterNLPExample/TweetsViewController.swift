@@ -9,7 +9,6 @@
 import UIKit
 import TwitterKit
 import SafariServices
-import Highlighter
 import Foundation
 
 class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
@@ -25,7 +24,6 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
     var range: NSRange? = nil
     let options: NSLinguisticTagger.Options = [.omitPunctuation, .omitWhitespace]
     
-    var tokens = [String]()
     
     var isLoadingTweets = false
     
@@ -102,19 +100,11 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         return tweets.count
     }
     
-    
-    /*
-     let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-     cell.textLabel?.text = tweets[indexPath.row]["text"].string
-     cell.detailTextLabel?.text = "By \(tweets[indexPath.row]["user"]["name"].string!), @\(tweets[indexPath.row]["user"]["screen_name"].string!)"
-     */
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // Retrieve the Tweet cell.
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-        
-        // Assign the delegate to control events on Tweets.
-        //cell.tweetView.delegate = self
-        
+
         // Retrieve the Tweet model from loaded Tweets.
         let tweet = tweets[indexPath.row]
         
@@ -160,6 +150,7 @@ extension TweetsViewController{
 extension TweetsViewController{
     func enumerate(scheme:NSLinguisticTagScheme, label: UILabel) -> [String]?{
         var keywords = [String]()
+        var tokens = [String]()
         var lemmas = [String]()
         
         let tags: [NSLinguisticTag] = [.personalName, .placeName, .organizationName]
@@ -190,7 +181,7 @@ extension TweetsViewController{
                 break
             case NSLinguisticTagScheme.tokenType:
                 if let tagVal = tag?.rawValue {
-                    self.tokens.append(tagVal.lowercased())
+                    tokens.append(tagVal.lowercased())
                 }
                 break
             default:
@@ -217,6 +208,9 @@ extension TweetsViewController{
         }else if (scheme == .lemma){
             print("lemmas \(lemmas)")
             return lemmas
+        }else if (scheme == .tokenType){
+            print("tokens \(tokens)")
+            return tokens
         }
         return nil
     }
