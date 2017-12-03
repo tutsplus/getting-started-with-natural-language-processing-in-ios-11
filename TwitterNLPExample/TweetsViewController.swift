@@ -159,7 +159,6 @@ extension TweetsViewController{
         tagger.string = label.text
         tagger.enumerateTags(in: range!, unit: .word, scheme: scheme, options: options) {
             tag, tokenRange, _ in
-            //let token = (self.tagger.string! as NSString).substring(with: tokenRange)
 
             switch(scheme){
             case NSLinguisticTagScheme.lemma:
@@ -189,8 +188,7 @@ extension TweetsViewController{
             }
 
         }
-        //print("tokens: \(tokens)")
-        
+
         if (scheme == .nameType){
             let keywordAttrString = NSMutableAttributedString(string: tagger.string!, attributes: nil)
             
