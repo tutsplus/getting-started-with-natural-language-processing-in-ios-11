@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             }
         }
         
-        Twitter.sharedInstance().start(withConsumerKey:consumer_key, consumerSecret:consumer_secret)
+        TWTRTwitter.sharedInstance().start(withConsumerKey:consumer_key, consumerSecret:consumer_secret)
         
         return true
     }

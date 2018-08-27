@@ -37,7 +37,7 @@ class TweetsViewController:  UITableViewController , TWTRTweetViewDelegate {
         tableView.register(TweetCell.self, forCellReuseIdentifier: reuseIdentifier)
         
         // Setup table data
-        Twitter.sharedInstance().sessionStore.fetchGuestSession { (guestSession, error) in
+        TWTRTwitter.sharedInstance().sessionStore.fetchGuestSession { (guestSession, error) in
             if (guestSession != nil) {
                 self.loadTweets()
             } else {
